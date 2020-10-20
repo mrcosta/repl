@@ -21,9 +21,3 @@ fn get_reference(existing: &Vec<RefTest>) -> Vec<&RefTest> {
 
     return return_test;
 }
-
-// fn find_referred_columns_id_that_needs_deletion(
-//     existing_columns: &Vec<RiskDirectoryMetadataColumn>,
-//     actual_metadata_column: &RiskDirectoryMetadataColumn,
-//     received_mv_option: &Option<String>,
-// ) -> Vec<MetadataColumnId> {
