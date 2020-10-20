@@ -6,6 +6,7 @@ extern crate maplit;
 use crate::closure_with_result_errors::{closure_with_result, closure_with_result_other};
 use crate::filter::test_filter_map;
 use crate::group_by::group_by_second_example;
+use crate::merge_join_by::merge_join_by_example;
 use crate::option::option;
 use crate::reference::reference_test;
 use crate::sorted_enum::print_sorted_enum;
@@ -16,6 +17,7 @@ use crate::threads::{
 mod closure_with_result_errors;
 mod filter;
 mod group_by;
+mod merge_join_by;
 mod option;
 mod reference;
 mod serde_deserialization;
@@ -30,5 +32,6 @@ fn main() {
     // thread_that_dont_wait_and_finish_after_main();
     // thread_that_waits_and_finish_before_main();
     // print_sorted_enum();
-    test_filter_map();
+    // test_filter_map();
+    merge_join_by_example();
 }

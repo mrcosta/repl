@@ -1,63 +1,70 @@
-use itertools::Itertools;
+use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 
-#[derive(Debug)]
-struct Test {
-    id: i32,
-}
-
 // IT NEEDS TO BE ORDERED TO WORK
-pub fn group_by_example() {
-    let data = vec![
-        (1, vec![Test { id: 0 }]),
-        (1, vec![Test { id: 3 }]),
-        (0, vec![Test { id: 1 }]),
-    ];
-    println!(
-        "{:?}",
-        data.into_iter()
-            .group_by(|test| test.0)
-            .into_iter()
-            // .for_each(|(x, y)| {
-            //     // println!("{:?}", (x, y.map(|test|.collect())
-            //     println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-            // })
-            .map(|(x, y)| {
-                // println!("{:?}", (x, y.map(|test|.collect())
-                // println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-                let ids_together = y
-                    .collect::<Vec<(i32, Vec<Test>)>>()
-                    .into_iter()
-                    .flat_map(|(_id, values)| values)
-                    .collect();
+pub fn merge_join_by_example() {
+    /* will print
+    i: 1, j: 4
+    i: 2, j: 4
+    i: 3, j: 4
+    {1: "1", 3: "3", 4: "5", 6: "6", 2: "2", 7: "7"}
+    It means that didn't find any assignee_id matching reviewer_id to compare
+    */
+    // let assignees = vec![(1, "1"), (2, "2"), (3, "3")];
+    // let reviewers = vec![(4, "5"), (6, "6"), (7, "7")];
 
-                (x, ids_together)
-            })
-            .collect::<HashMap<i32, Vec<Test>>>()
-    );
-}
+    /* will print
+    i: 1, j: 4
+    i: 2, j: 4
+    i: 3, j: 4
+    {3: "3", 7: "7", 1: "1", 8: "8", 2: "2", 4: "5", 6: "6"}
+    It means that number of iterations is made based on the first iterator
+    */
+    // let assignees = vec![(1, "1"), (2, "2"), (3, "3")];
+    // let reviewers = vec![(4, "5"), (6, "6"), (7, "7"), (8, "8")];
 
-pub fn group_by_second_example() {
-    let data = vec![Test { id: 0 }, Test { id: 1 }, Test { id: 2 }];
+    /* will print
+    i: 1, j: 1
+    i: 2, j: 2
+    i: 3, j: 3
+    {3: "37", 1: "15", 8: "8", 2: "26"}
+    It means that will pair the ones that are equal
+     */
+    // let assignees = vec![(1, "1"), (2, "2"), (3, "3"), (8, "8")];
+    // let reviewers = vec![(1, "5"), (2, "6"), (3, "7")];
 
-    data.into_iter()
-        .group_by(|test| test.id)
+    /* will print
+    i: 1, j: 1 // merge
+    i: 2, j: 3 // remove 2
+    i: 3, j: 3 // remove both
+    i: 8, j: 2 // remove 2
+    i: 8, j: 9 // remove 8
+    {2: "7", 3: "36", 8: "8", 9: "9", 1: "15"}
+     */
+    let assignees = vec![(1, "1"), (2, "2"), (3, "3"), (8, "8")];
+    let reviewers = vec![(1, "5"), (3, "6"), (2, "7"), (9, "9")];
+
+    /* - Emit `EitherOrBoth::Left(i)` when `i < j`,
+    ///   and remove `i` from its source iterator
+    /// - Emit `EitherOrBoth::Right(j)` when `i > j`,
+    ///   and remove `j` from its source iterator
+    /// - Emit `EitherOrBoth::Both(i, j)` when  `i == j`,
+    and remove both `i` and `j` from their respective source iterators */
+    let assignees_and_reviewers: HashMap<i32, String> = assignees
         .into_iter()
-        .for_each(|(x, y)| {
-            println!("{:?}", (x, y.collect::<Vec<_>>()));
-            // println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-        });
-    // .collect::<HashMap<i32, Vec<Test>>>();
+        .merge_join_by(reviewers.into_iter(), |(i, _), (j, _)| {
+            println!("i: {}, j: {}", i, j);
+            i.cmp(j)
+        })
+        .map(|either| match either {
+            EitherOrBoth::Left((assignee_id, value)) => (assignee_id, value.to_string()),
+            EitherOrBoth::Right((reviewer_id, value)) => (reviewer_id, value.to_string()),
+            EitherOrBoth::Both((assignee_id, assignee_value), (_reviewer_id, reviewer_value)) => (
+                assignee_id,
+                (assignee_value.to_owned() + reviewer_value).to_string(),
+            ),
+        })
+        .collect();
 
-    // let grouped_by = data
-    //     .into_iter()
-    //     .group_by(|test| test.id)
-    //     .into_iter()
-    //     .map(|(x, y)| {
-    //         println!("{:?}", (x, y.collect::<Vec<_>>()));
-    //         // println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-    //         (x, y.collect())
-    //     })
-    //     .collect::<HashMap<i32, Vec<Test>>>();
-    // println!("{:?}", grouped_by);
+    println!("{:?}", assignees_and_reviewers);
 }
