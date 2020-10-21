@@ -13,6 +13,7 @@ use crate::sorted_enum::print_sorted_enum;
 use crate::threads::{
     thread_that_dont_wait_and_finish_after_main, thread_that_waits_and_finish_before_main,
 };
+use crate::vectors::test_sorted_vectors;
 
 mod closure_with_result_errors;
 mod filter;
@@ -23,6 +24,7 @@ mod reference;
 mod serde_deserialization;
 mod sorted_enum;
 mod threads;
+mod vectors;
 
 fn main() {
     // reference_test();
@@ -33,5 +35,6 @@ fn main() {
     // thread_that_waits_and_finish_before_main();
     // print_sorted_enum();
     // test_filter_map();
-    merge_join_by_example();
+    // merge_join_by_example();
+    test_sorted_vectors();
 }
