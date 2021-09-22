@@ -1,40 +1,72 @@
-#![allow(dead_code, unused_imports, unused_must_use)]
-
-#[macro_use]
-extern crate maplit;
-
-use crate::closure_with_result_errors::{closure_with_result, closure_with_result_other};
-use crate::filter::test_filter_map;
-use crate::group_by::group_by_second_example;
-use crate::merge_join_by::merge_join_by_example;
-use crate::option::option;
-use crate::reference::reference_test;
-use crate::sorted_enum::print_sorted_enum;
-use crate::threads::{
-    thread_that_dont_wait_and_finish_after_main, thread_that_waits_and_finish_before_main,
-};
-use crate::vectors::test_sorted_vectors;
-
-mod closure_with_result_errors;
-mod filter;
-mod group_by;
-mod merge_join_by;
-mod option;
-mod reference;
-mod serde_deserialization;
-mod sorted_enum;
-mod threads;
+mod reqwest;
 mod vectors;
 
-fn main() {
-    // reference_test();
-    // group_by_second_example()
-    // closure_with_result_other();
-    // option();
-    // thread_that_dont_wait_and_finish_after_main();
-    // thread_that_waits_and_finish_before_main();
-    // print_sorted_enum();
-    // test_filter_map();
-    // merge_join_by_example();
-    test_sorted_vectors();
+use crate::reqwest::dns_made_easy_request;
+use std::collections::HashMap;
+use std::env;
+use std::fs;
+use std::fs::File;
+use std::io;
+use std::io::{BufRead, BufReader};
+
+extern crate chrono_tz;
+
+macro_rules! read_line(
+    () => {{
+        let mut line = String::new();
+        io::stdin().read_line(&mut line).expect("Something went wrong when reading the input.");
+        String::from(line.trim())
+    }}
+);
+
+#[tokio::main]
+async fn main() {
+    // let _file_name = read_line!();
+
+    // count_requests_by_host(&file_name);
+    dns_made_easy_request().await.unwrap();
+}
+
+fn count_requests_by_host(file_name: &str) {
+    // TODO: return result instead of using expect
+    let path = env::current_dir().expect("Path not found");
+    let file = File::open(format!("{}_{}", path.display(), file_name))
+        .expect(&format!("File {} was not found.", file_name));
+    let lines = BufReader::new(file).lines();
+
+    let mut count_request_by_hostname: HashMap<String, u32> = HashMap::new();
+    for line_result in lines {
+        let line = line_result.expect("Something wrong happened while reading the line");
+        let hostname = line
+            .clone()
+            .split_whitespace()
+            .map(|column| column.to_owned())
+            .collect::<Vec<String>>()
+            .first()
+            .expect("Hostname was not found")
+            .clone();
+
+        count_request_by_hostname
+            .entry(hostname)
+            .and_modify(|request_count| *request_count += 1)
+            .or_insert(1);
+    }
+
+    // TODO: extract write file logic to its own method
+    let file_content = count_request_by_hostname
+        .iter()
+        .map(|(hostname, request_count)| format!("{} {}\n", hostname, request_count))
+        .collect::<String>();
+    println!("{}", format!("records_{}", file_name));
+    fs::write(format!("records_{}", file_name), file_content).expect("Unable to write file");
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::count_requests_by_host;
+
+    #[test]
+    fn test_case_1() {
+        count_requests_by_host("hosts_access_log_00.txt");
+    }
 }

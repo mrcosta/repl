@@ -1,5 +1,6 @@
 use itertools::Itertools;
 
+#[test]
 pub fn test_sorted_vectors() {
     let test = vec!["1", "2", "3"];
     let test_2 = vec!["2", "1", "3"];

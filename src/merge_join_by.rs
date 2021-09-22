@@ -68,3 +68,27 @@ pub fn merge_join_by_example() {
 
     println!("{:?}", assignees_and_reviewers);
 }
+
+pub fn merge_join_by_example_with_sorted() {
+    let assignees = vec![(2, "2"), (3, "3"), (8, "8"), (1, "1")];
+    let reviewers = vec![(1, "5"), (3, "6"), (2, "7"), (9, "9"), (1, "5")];
+
+    let assignees_and_reviewers: HashMap<i32, String> = assignees
+        .into_iter()
+        .sorted()
+        .merge_join_by(reviewers.into_iter(), |(i, _), (j, _)| {
+            println!("i: {}, j: {}", i, j);
+            i.cmp(j)
+        })
+        .map(|either| match either {
+            EitherOrBoth::Left((assignee_id, value)) => (assignee_id, value.to_string()),
+            EitherOrBoth::Right((reviewer_id, value)) => (reviewer_id, value.to_string()),
+            EitherOrBoth::Both((assignee_id, assignee_value), (_reviewer_id, reviewer_value)) => (
+                assignee_id,
+                (assignee_value.to_owned() + reviewer_value).to_string(),
+            ),
+        })
+        .collect();
+
+    println!("{:?}", assignees_and_reviewers);
+}

@@ -13,28 +13,30 @@ pub fn group_by_example() {
         (1, vec![Test { id: 3 }]),
         (0, vec![Test { id: 1 }]),
     ];
-    println!(
-        "{:?}",
-        data.into_iter()
-            .group_by(|test| test.0)
-            .into_iter()
-            // .for_each(|(x, y)| {
-            //     // println!("{:?}", (x, y.map(|test|.collect())
-            //     println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-            // })
-            .map(|(x, y)| {
-                // println!("{:?}", (x, y.map(|test|.collect())
-                // println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
-                let ids_together = y
-                    .collect::<Vec<(i32, Vec<Test>)>>()
-                    .into_iter()
-                    .flat_map(|(_id, values)| values)
-                    .collect();
 
-                (x, ids_together)
-            })
-            .collect::<HashMap<i32, Vec<Test>>>()
-    );
+    data.into_iter()
+        .group_by(|test| test.0)
+        .into_iter()
+        .for_each(|(_x, y)| {
+            // println!("{:?}", (x, y.map(|test|.collect())
+            println!("{:?}", y.collect::<Vec<(i32, Vec<Test>)>>())
+        });
+    // println!(
+    //     "{:?}",
+    //     data.into_iter()
+    //         .group_by(|test| test.0)
+    //         .into_iter()
+    //         .map(|(x, y)| {
+    //             let ids_together = y
+    //                 .collect::<Vec<(i32, Vec<Test>)>>()
+    //                 .into_iter()
+    //                 .flat_map(|(_id, values)| values)
+    //                 .collect();
+    //
+    //             (x, ids_together)
+    //         })
+    //         .collect::<HashMap<i32, Vec<Test>>>()
+    // );
 }
 
 pub fn group_by_second_example() {
